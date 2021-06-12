@@ -40,16 +40,16 @@ def action_to_closest_prey(state_dict: Dict) -> List[int]:
     return action
 
 
-def state_dict_to_array(state_dict: Dict) -> np.ndarray:
-    state_dim = len(state_dict["preys"]) + 2 * sum(len(state_dict[k]) for k in ["predators", "preys", "obstacles"])
+def state_dict_to_array(predators: List[Dict], preys: List[Dict], obstacles: List[Dict]) -> np.ndarray:
+    state_dim = len(preys) + 2 * (len(predators) + len(preys) + len(obstacles))
     result = np.zeros(state_dim, dtype=np.float32)
     pos = 0
-    for it in ["predators", "preys", "obstacles"]:
-        for desc in state_dict[it]:
+    for it in [predators, preys, obstacles]:
+        for desc in it:
             result[pos] = desc["x_pos"]
             result[pos + 1] = desc["y_pos"]
             pos += 2
-    for desc in state_dict["preys"]:
+    for desc in preys:
         result[pos] = desc["is_alive"]
         pos += 1
     return result

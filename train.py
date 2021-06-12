@@ -32,7 +32,7 @@ class Trainer:
             state_dict = env.reset()
 
             while not done:
-                state = state_dict_to_array(state_dict)
+                state = state_dict_to_array(**state_dict)
                 state_dict, done = env.step(predator_agent.act(state_dict), [prey_agent.act(state)])
             returns.append(state_dict["preys"][0]["is_alive"])
         return returns
@@ -59,8 +59,8 @@ class Trainer:
             next_state_dict, done = env.step(predator_pfm.act(state_dict), action)
             reward = calculate_dead(state_dict) * -10
 
-            state = state_dict_to_array(state_dict)
-            next_state = state_dict_to_array(next_state_dict)
+            state = state_dict_to_array(**state_dict)
+            next_state = state_dict_to_array(**next_state_dict)
             prey_td3.consume_transition(state, action, next_state, reward, done)
 
             state_dict = next_state_dict if not done else env.reset()
@@ -70,12 +70,12 @@ class Trainer:
         state_dict = env.reset()
         for i in tqdm(range(self._config.transitions), total=self._config.transitions):
             # Epsilon-greedy policy
-            state = state_dict_to_array(state_dict)
+            state = state_dict_to_array(**state_dict)
             action = prey_td3.act(state)
             action = np.clip(action + self._config.eps * np.random.randn(*action.shape), -1, 1)
 
             next_state_dict, done = env.step(predator_pfm.act(state_dict), [action])
-            next_state = state_dict_to_array(next_state_dict)
+            next_state = state_dict_to_array(**next_state_dict)
             reward = calculate_dead(state_dict) * -10
 
             prey_td3.update(state, action, next_state, reward, done)

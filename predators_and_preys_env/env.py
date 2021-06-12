@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
         "prey_speed": 9.0,
         "world_timestep": 1 / 40,
     },
-    "environment": {"frameskip": 2, "time_limit": 1000},
+    "environment": {"frameskip": 2, "time_limit": 100},
 }
 
 

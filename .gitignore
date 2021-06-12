@@ -1,5 +1,6 @@
 .idea/
 submission_template/
+__pycache__/
 
 *.pkl
 *.zip

@@ -17,7 +17,7 @@ class Config:
     tau: float = 0.002
     eps: float = 0.2
     sigma: float = 2
-    batch_size: int = 128
+    batch_size: int = 512
     transitions: int = 5_000_000
     buffer_size: int = 2_000_000
     initial_steps: int = batch_size * 256
