@@ -1,32 +1,22 @@
 import numpy as np
+
 from predators_and_preys_env.agent import PredatorAgent, PreyAgent
-
-
-def distance(first, second):
-    return ((first["x_pos"] - second["x_pos"]) ** 2 + (first["y_pos"] - second["y_pos"]) ** 2) ** 0.5
+from utils import distance
 
 
 class ChasingPredatorAgent(PredatorAgent):
     def act(self, state_dict):
-        action = []
-        for predator in state_dict["predators"]:
-            closest_prey = None
-            for prey in state_dict["preys"]:
-                if not prey["is_alive"]:
-                    continue
-                if closest_prey is None:
-                    closest_prey = prey
-                else:
-                    if distance(closest_prey, predator) > distance(prey, predator):
-                        closest_prey = prey
-            if closest_prey is None:
-                action.append(0.0)
-            else:
-                action.append(
-                    np.arctan2(closest_prey["y_pos"] - predator["y_pos"], closest_prey["x_pos"] - predator["x_pos"])
-                    / np.pi
-                )
-        return action
+        target = None
+        for prey in state_dict["preys"]:
+            if prey["is_alive"]:
+                target = prey
+                break
+        if target is None:
+            return [0 for _ in state_dict["predators"]]
+        return [
+            np.arctan2(target["y_pos"] - predator["y_pos"], target["x_pos"] - predator["x_pos"]) / np.pi
+            for predator in state_dict["predators"]
+        ]
 
 
 class FleeingPreyAgent(PreyAgent):

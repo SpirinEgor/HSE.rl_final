@@ -6,7 +6,7 @@ DEFAULT_CONFIG = {
     "game": {
         "num_obsts": 10,
         "num_preds": 2,
-        "num_preys": 5,
+        "num_preys": 1,
         "x_limit": 9,
         "y_limit": 9,
         "obstacle_radius_bounds": [0.8, 1.5],
@@ -23,6 +23,7 @@ DEFAULT_CONFIG = {
 class PredatorsAndPreysEnv:
     def __init__(self, config=DEFAULT_CONFIG, render=False):
         self.game = Game(config["game"])
+        self.config = config
         self.time_limit = config["environment"]["time_limit"]
         self.frame_skip = config["environment"]["frameskip"]
         self.predator_action_size = config["game"]["num_preds"]
