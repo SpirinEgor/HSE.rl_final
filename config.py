@@ -6,11 +6,11 @@ class Config:
     seed: int = 7
 
     actor_lr: float = 2e-3
-    actor_hidden_dim: int = 256
+    actor_hidden_dim: int = 512
     actor_hidden_layers: int = 2
 
     critic_lr: float = 1e-4
-    critic_hidden_dim: int = 256
+    critic_hidden_dim: int = 512
     critic_hidden_layers: int = 2
 
     gamma: float = 0.99

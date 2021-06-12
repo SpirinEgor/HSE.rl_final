@@ -15,6 +15,7 @@ class TD3:
         self._action_dim = action_dim
         self._config = config
         self._device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        print(f"Using device: {self._device}")
 
         self.actor = Actor(state_dim, action_dim, config).to(self._device)
         self.critics = [
