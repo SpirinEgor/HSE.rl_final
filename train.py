@@ -76,7 +76,7 @@ class Trainer:
 
             next_state_dict, done = env.step(predator_pfm.act(state_dict), [action])
             next_state = state_dict_to_array(next_state_dict)
-            reward = (calculate_dead(state_dict) + 10) * -1
+            reward = calculate_dead(state_dict) * -10
 
             prey_td3.update(state, action, next_state, reward, done)
 
