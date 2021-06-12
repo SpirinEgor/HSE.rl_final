@@ -14,12 +14,9 @@ DEFAULT_CONFIG = {
         "predator_radius": 1.0,
         "predator_speed": 6.0,
         "prey_speed": 9.0,
-        "world_timestep": 1/40,
+        "world_timestep": 1 / 40,
     },
-    "environment": {
-        "frameskip": 2,
-        "time_limit": 1000
-    }
+    "environment": {"frameskip": 2, "time_limit": 1000},
 }
 
 
@@ -41,10 +38,7 @@ class PredatorsAndPreysEnv:
         if self.time_left < 0:
             return self.game.get_state_dict(), True
 
-        action_dict = {
-            "preys": prey_actions,
-            "predators": predator_actions
-        }
+        action_dict = {"preys": prey_actions, "predators": predator_actions}
 
         for _ in range(self.frame_skip):
             self.game.step(action_dict)

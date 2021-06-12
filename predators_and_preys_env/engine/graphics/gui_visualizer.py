@@ -8,7 +8,7 @@ class GuiVisualizer:
         x_size = game.x_limit
         y_size = game.y_limit
         ratio = y_size / x_size
-        if ratio <= 1.:
+        if ratio <= 1.0:
             x_size = 640
             y_size = x_size * ratio
         else:
@@ -24,28 +24,35 @@ class GuiVisualizer:
     def update(self):
         self.screen.fill((255, 255, 255))
         for entity in self.game.obstacles:
-            pygame.draw.circle(self.screen, (160, 160, 160),
-                               ((entity.position[0] + self.x_bias) * self.ratio,
-                                (entity.position[1] + self.y_bias) * self.ratio),
-                               entity.radius * self.ratio)
+            pygame.draw.circle(
+                self.screen,
+                (160, 160, 160),
+                ((entity.position[0] + self.x_bias) * self.ratio, (entity.position[1] + self.y_bias) * self.ratio),
+                entity.radius * self.ratio,
+            )
 
         for entity in self.game.predators:
-            pygame.draw.circle(self.screen, (220, 0, 0),
-                               ((entity.position[0] + self.x_bias) * self.ratio,
-                                (entity.position[1] + self.y_bias) * self.ratio),
-                               entity.radius * self.ratio)
+            pygame.draw.circle(
+                self.screen,
+                (220, 0, 0),
+                ((entity.position[0] + self.x_bias) * self.ratio, (entity.position[1] + self.y_bias) * self.ratio),
+                entity.radius * self.ratio,
+            )
 
         for is_alive, entity in self.game.preys:
             if is_alive:
-                pygame.draw.circle(self.screen, (0, 220, 0),
-                                   ((entity.position[0] + self.x_bias) * self.ratio,
-                                    (entity.position[1] + self.y_bias) * self.ratio),
-                                   entity.radius * self.ratio)
+                pygame.draw.circle(
+                    self.screen,
+                    (0, 220, 0),
+                    ((entity.position[0] + self.x_bias) * self.ratio, (entity.position[1] + self.y_bias) * self.ratio),
+                    entity.radius * self.ratio,
+                )
             else:
-                pygame.draw.circle(self.screen, (70, 70, 70),
-                                   ((entity.position[0] + self.x_bias) * self.ratio,
-                                    (entity.position[1] + self.y_bias) * self.ratio),
-                                   entity.radius * self.ratio)
+                pygame.draw.circle(
+                    self.screen,
+                    (70, 70, 70),
+                    ((entity.position[0] + self.x_bias) * self.ratio, (entity.position[1] + self.y_bias) * self.ratio),
+                    entity.radius * self.ratio,
+                )
 
         pygame.display.update()
-

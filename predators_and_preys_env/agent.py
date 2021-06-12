@@ -11,4 +11,3 @@ class PreyAgent:
     @abc.abstractmethod
     def act(self, state_dict):
         pass
-
