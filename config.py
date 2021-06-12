@@ -23,5 +23,5 @@ class Config:
     initial_steps: int = batch_size * 64
     clip_value: float = 0.5
 
-    evaluate_step: int = 10_000
+    evaluate_step: int = 50_000
     evaluate_episodes: int = 5
