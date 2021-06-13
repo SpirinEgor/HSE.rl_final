@@ -1,22 +1,58 @@
 # Эти классы (неявно) имплементируют необходимые классы агентов
 # Если Вам здесь нужны какие-то локальные импорты, то их необходимо относительно текущего пакета
 # Пример: `import .utils`, где файл `utils.py` лежит рядом с `submission.py`
+from os.path import dirname, join
 from typing import Dict, List
 
-from .obstacle_avoidance.agents import ObstacleAvoidancePredatorAgent, ObstacleAvoidancePreyAgent
+import torch
+
+from .imitation.model import ImitationModel
+from .utils import state_dict_to_array
 
 
 class PredatorAgent:
-    def __init__(self, n_predators: int = 2):
-        self._predator_agent = ObstacleAvoidancePredatorAgent(n_predators)
+    _device = torch.device("cpu")
+
+    def __init__(self, path="predators.pkl"):
+        super().__init__()
+        base_dir = dirname(__file__)
+        state_dict = torch.load(join(base_dir, path), map_location=self._device)
+        self._model = ImitationModel(**state_dict["parameters"])
+        self._model.load_state_dict(state_dict["state_dict"])
 
     def act(self, state_dict: Dict) -> List[float]:
-        return self._predator_agent.act(state_dict)
+        action = []
+        for predator in state_dict["predators"]:
+            with torch.no_grad():
+                state = torch.tensor(
+                    state_dict_to_array([predator], state_dict["preys"], state_dict["obstacles"]),
+                    dtype=torch.float32,
+                    device=self._device,
+                )
+                action.append(self._model(state).item())
+
+        return action
 
 
 class PreyAgent:
-    def __init__(self, n_preys: int = 5):
-        self._prey_agent = ObstacleAvoidancePreyAgent(n_preys)
+    _device = torch.device("cpu")
+
+    def __init__(self, path="preys.pkl"):
+        base_dir = dirname(__file__)
+        state_dict = torch.load(join(base_dir, path), map_location=self._device)
+        self._model = ImitationModel(**state_dict["parameters"])
+        self._model.load_state_dict(state_dict["state_dict"])
 
     def act(self, state_dict: Dict) -> List[float]:
-        return self._prey_agent.act(state_dict)
+        action = []
+        for prey in state_dict["preys"]:
+            with torch.no_grad():
+                state = torch.tensor(
+                    state_dict_to_array(state_dict["predators"], [prey], state_dict["obstacles"]),
+                    dtype=torch.float32,
+                    device=self._device,
+                )
+                action.append(self._model(state).item())
+
+        return action
+

@@ -11,7 +11,7 @@ from utils import state_dict_to_array
 class ImitationPredatorAgent(PredatorAgent):
     _device = torch.device("cpu")
 
-    def __init__(self, path="predators.pkl"):
+    def __init__(self, path="../predators.pkl"):
         super().__init__()
         base_dir = dirname(__file__)
         state_dict = torch.load(join(base_dir, path), map_location=self._device)
@@ -32,10 +32,10 @@ class ImitationPredatorAgent(PredatorAgent):
         return action
 
 
-class SolutionPreyAgent(PreyAgent):
+class ImitationPreyAgent(PreyAgent):
     _device = torch.device("cpu")
 
-    def __init__(self, path="preys.pkl"):
+    def __init__(self, path="../preys.pkl"):
         base_dir = dirname(__file__)
         state_dict = torch.load(join(base_dir, path), map_location=self._device)
         self._model = ImitationModel(**state_dict["parameters"])
@@ -53,4 +53,3 @@ class SolutionPreyAgent(PreyAgent):
                 action.append(self._model(state).item())
 
         return action
-
