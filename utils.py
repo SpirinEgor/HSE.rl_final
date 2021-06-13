@@ -2,6 +2,8 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
+from predators_and_preys_env.env import PredatorsAndPreysEnv
+
 
 def calculate_dead(state_dict: Dict) -> int:
     cnt = 0
@@ -27,19 +29,6 @@ def get_closest(source: Dict, targets: Dict) -> Optional[Dict]:
     return closest
 
 
-def action_to_closest_prey(state_dict: Dict) -> List[int]:
-    action = []
-    for predator in state_dict["predators"]:
-        closest_prey = get_closest(predator, state_dict["preys"])
-        if closest_prey is None:
-            action.append(0.0)
-        else:
-            action.append(
-                np.arctan2(closest_prey["y_pos"] - predator["y_pos"], closest_prey["x_pos"] - predator["x_pos"]) / np.pi
-            )
-    return action
-
-
 def state_dict_to_array(predators: List[Dict], preys: List[Dict], obstacles: List[Dict]) -> np.ndarray:
     state_dim = len(preys) + 2 * (len(predators) + len(preys) + len(obstacles))
     result = np.zeros(state_dim, dtype=np.float32)
@@ -53,3 +42,11 @@ def state_dict_to_array(predators: List[Dict], preys: List[Dict], obstacles: Lis
         result[pos] = desc["is_alive"]
         pos += 1
     return result
+
+
+def run_until_done(env: PredatorsAndPreysEnv, predator_agent, prey_agent) -> Dict:
+    state_dict = env.reset()
+    while True:
+        state_dict, done = env.step(predator_agent.act(state_dict), prey_agent.act(state_dict))
+        if done:
+            return state_dict

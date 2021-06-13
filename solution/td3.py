@@ -1,12 +1,13 @@
 from copy import deepcopy
+from typing import Dict
 
-import numpy as np
 import torch
 from torch.nn import functional as F
 from torch.optim import Adam
 
-from solution.actor_critic import Actor, Critic
 from config import Config
+from solution.actor_critic import Actor, Critic
+from utils import state_dict_to_array
 
 
 class TD3:
@@ -45,7 +46,10 @@ class TD3:
         for tp, sp in zip(target.parameters(), source.parameters()):
             tp.data.copy_((1 - self._config.tau) * tp.data + self._config.tau * sp.data)
 
-    def consume_transition(self, state, action, next_state, reward, done):
+    def consume_transition(self, state_dict: Dict, action, next_state_dict: Dict, reward, done):
+        state = state_dict_to_array(**state_dict)
+        next_state = state_dict_to_array(**next_state_dict)
+
         self._state_buffer[self._buffer_pos] = torch.tensor(state, device=self._device)
         self._action_buffer[self._buffer_pos] = torch.tensor(action, device=self._device)
         self._next_state_buffer[self._buffer_pos] = torch.tensor(next_state, device=self._device)
@@ -55,8 +59,8 @@ class TD3:
         self._buffer_pos = (self._buffer_pos + 1) % self._config.buffer_size
         self._consumed_transitions += 1
 
-    def update(self, state, action, next_state, reward, done):
-        self.consume_transition(state, action, next_state, reward, done)
+    def update(self, state_dict: Dict, action, next_state_dict: Dict, reward, done):
+        self.consume_transition(state_dict, action, next_state_dict, reward, done)
 
         if self._consumed_transitions < 16 * self._config.batch_size:
             return
@@ -100,11 +104,10 @@ class TD3:
             self.soft_update(target_critic, critic)
         self.soft_update(self.target_actor, self.actor)
 
-    def act(self, state):
+    def act(self, state_dict: Dict):
         with torch.no_grad():
-            state = torch.tensor([state], dtype=torch.float32, device=self._device)
-            x, y = self.actor(state).squeeze(0).cpu().numpy()
-            return np.arctan2(x, y) / np.pi
+            state = torch.tensor(state_dict_to_array(**state_dict), dtype=torch.float32, device=self._device)
+            return self.actor(state)
 
     def save(self, filename: str = "agent.pkl"):
         state = {

@@ -1,5 +1,6 @@
 import random
 from dataclasses import asdict
+from typing import Dict
 
 import numpy as np
 import torch
@@ -9,7 +10,7 @@ from solution.td3 import TD3
 from config import Config
 from obstacle_avoidance.agents import ObstacleAvoidancePredatorAgent, ObstacleAvoidancePreyAgent
 from predators_and_preys_env.env import PredatorsAndPreysEnv
-from utils import calculate_dead, state_dict_to_array
+from utils import calculate_dead, state_dict_to_array, run_until_done
 
 
 class Trainer:
@@ -28,14 +29,18 @@ class Trainer:
         predator_agent = ObstacleAvoidancePredatorAgent(env.config["game"]["num_preds"])
         returns = []
         for _ in range(self._config.evaluate_episodes):
-            done = False
-            state_dict = env.reset()
-
-            while not done:
-                state = state_dict_to_array(**state_dict)
-                state_dict, done = env.step(predator_agent.act(state_dict), [prey_agent.act(state)])
+            state_dict = run_until_done(env, predator_agent, prey_agent)
             returns.append(state_dict["preys"][0]["is_alive"])
         return returns
+
+    @staticmethod
+    def reward(state_dict: Dict, done: bool) -> float:
+        killed = calculate_dead(state_dict) > 0
+        if killed:
+            return -10
+        elif done:
+            return 10
+        return 0
 
     def train(self):
         str_config = "\n".join(f"{key}: {value}" for key, value in asdict(self._config).items())
@@ -49,36 +54,29 @@ class Trainer:
         state_dim = (n_obstacles + n_predators + n_preys) * 2 + n_preys
 
         predator_pfm = ObstacleAvoidancePredatorAgent(n_predators)
-        prey_pfm = ObstacleAvoidancePreyAgent(n_preys)
         prey_td3 = TD3(state_dim=state_dim, action_dim=2, config=self._config)
 
         state_dict = env.reset()
         print("Do initial steps")
         for _ in tqdm(range(self._config.initial_steps), total=self._config.initial_steps):
-            action = prey_pfm.act(state_dict)
+            action = np.random.rand(1) * 2 - 1
             next_state_dict, done = env.step(predator_pfm.act(state_dict), action)
-            reward = calculate_dead(state_dict) * -10
-
-            state = state_dict_to_array(**state_dict)
-            next_state = state_dict_to_array(**next_state_dict)
-            prey_td3.consume_transition(state, action, next_state, reward, done)
-
+            reward = self.reward(next_state_dict, done)
+            prey_td3.consume_transition(state_dict, action, next_state_dict, reward, done)
             state_dict = next_state_dict if not done else env.reset()
 
         print(f"Start training")
         best_score = None
         state_dict = env.reset()
+        eps = np.linspace(self._config.eps, 0, self._config.transitions)
         for i in tqdm(range(self._config.transitions), total=self._config.transitions):
             # Epsilon-greedy policy
-            state = state_dict_to_array(**state_dict)
-            action = prey_td3.act(state)
-            action = np.clip(action + self._config.eps * np.random.randn(*action.shape), -1, 1)
+            action = prey_td3.act(state_dict)
+            action = np.clip(action + eps[0] * np.random.randn(*action.shape), -1, 1)
 
-            next_state_dict, done = env.step(predator_pfm.act(state_dict), [action])
-            next_state = state_dict_to_array(**next_state_dict)
-            reward = calculate_dead(state_dict) * -10
-
-            prey_td3.update(state, action, next_state, reward, done)
+            next_state_dict, done = env.step(predator_pfm.act(state_dict), action)
+            reward = self.reward(next_state_dict, done)
+            prey_td3.update(state_dict, action, next_state_dict, reward, done)
 
             state_dict = next_state_dict if not done else env.reset()
 
