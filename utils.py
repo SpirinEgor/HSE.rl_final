@@ -1,6 +1,8 @@
+import random
 from typing import Dict, List, Optional
 
 import numpy as np
+import torch
 
 from predators_and_preys_env.env import PredatorsAndPreysEnv
 
@@ -50,3 +52,10 @@ def run_until_done(env: PredatorsAndPreysEnv, predator_agent, prey_agent) -> Dic
         state_dict, done = env.step(predator_agent.act(state_dict), prey_agent.act(state_dict))
         if done:
             return state_dict
+
+
+def seed_everything(env: PredatorsAndPreysEnv, seed: int):
+    env.game.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    np.random.seed(seed)

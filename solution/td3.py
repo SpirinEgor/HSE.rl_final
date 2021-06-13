@@ -80,7 +80,7 @@ class TD3:
             noise = torch.clip(
                 self._config.sigma * torch.randn_like(target_action) - self._config.sigma / 2,
                 -self._config.clip_value,
-                self._config.clip_value
+                self._config.clip_value,
             )
             target_action = torch.clip(target_action + noise, -1, 1)
 

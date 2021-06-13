@@ -1,6 +1,7 @@
 from os.path import dirname, join
 from typing import Dict, List
 
+import numpy as np
 import torch
 
 from predators_and_preys_env.agent import PredatorAgent, PreyAgent
@@ -25,7 +26,13 @@ class SolutionPreyAgent(PreyAgent):
     def act(self, state_dict: Dict) -> List[float]:
         action = []
         for prey in state_dict["preys"]:
-            with torch.no_grad():
-                state = torch.tensor(state_dict_to_array(state_dict["predators"], [prey], state_dict["obstacles"]))
-                action.append(self._actor(state))
+            state = torch.tensor(
+                state_dict_to_array(state_dict["predators"], [prey], state_dict["obstacles"]),
+                dtype=torch.float32,
+                device=self._device,
+            )
+            coords = self._actor(state)
+            x, y = coords.detach().cpu().numpy()
+            action.append(np.arctan2(y, x) / np.pi)
+
         return action

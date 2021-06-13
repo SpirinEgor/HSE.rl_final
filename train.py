@@ -1,27 +1,20 @@
-import random
+from dataclasses import asdict
 from dataclasses import asdict
 from typing import Dict
 
 import numpy as np
-import torch
 from tqdm import tqdm
 
-from solution.td3 import TD3
 from config import Config
-from obstacle_avoidance.agents import ObstacleAvoidancePredatorAgent, ObstacleAvoidancePreyAgent
+from obstacle_avoidance.agents import ObstacleAvoidancePredatorAgent
 from predators_and_preys_env.env import PredatorsAndPreysEnv
-from utils import calculate_dead, state_dict_to_array, run_until_done
+from solution.td3 import TD3
+from utils import calculate_dead, run_until_done, seed_everything
 
 
 class Trainer:
     def __init__(self, config: Config):
         self._config = config
-
-    def _seed_everything(self, env: PredatorsAndPreysEnv):
-        env.game.seed(self._config.seed)
-        random.seed(self._config.seed)
-        torch.manual_seed(self._config.seed)
-        np.random.seed(self._config.seed)
 
     def evaluate_policy(self, prey_agent: TD3):
         env = PredatorsAndPreysEnv(render=True)
@@ -47,7 +40,7 @@ class Trainer:
         print(f"Train config:\n{str_config}")
 
         env = PredatorsAndPreysEnv()
-        self._seed_everything(env)
+        seed_everything(env, self._config.seed)
         n_obstacles = env.config["game"]["num_obsts"]
         n_predators = env.config["game"]["num_preds"]
         n_preys = env.config["game"]["num_preys"]
