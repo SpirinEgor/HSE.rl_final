@@ -20,7 +20,7 @@ class Config:
     batch_size: int = 512
     transitions: int = 5_000_000
     buffer_size: int = 2_000_000
-    initial_steps: int = batch_size * 1
+    initial_steps: int = batch_size * 512
     clip_value: float = 0.5
 
     evaluate_step: int = 1_000
