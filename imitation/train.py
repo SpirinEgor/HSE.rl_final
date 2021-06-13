@@ -16,7 +16,7 @@ LR = 0.001
 N_EPOCHS = 20
 
 N_LAYERS = 3
-HIDDEN_DIM = 1024
+HIDDEN_DIM = 512
 
 
 def train(mode: str, data_path: str):
@@ -42,10 +42,10 @@ def train(mode: str, data_path: str):
             loss = mse_loss(pred_y, batch_y)
             batch_bar.set_description(f"Batch (loss: {loss.item()}):")
 
-            model.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_value_(model.parameters(), 5.0)
             optimizer.step()
+            model.zero_grad()
             model.save(f"{mode}.pkl")
 
 
