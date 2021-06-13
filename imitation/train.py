@@ -13,7 +13,7 @@ from utils import seed_everything
 SEED = 7
 BATCH_SIZE = 2048
 LR = 0.001
-N_EPOCHS = 100
+N_EPOCHS = 20
 
 N_LAYERS = 5
 HIDDEN_DIM = 1024
