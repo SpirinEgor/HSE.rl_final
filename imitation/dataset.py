@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 import torch
 from torch.utils.data import Dataset
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 from utils import state_dict_to_array
 

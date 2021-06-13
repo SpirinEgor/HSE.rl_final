@@ -4,7 +4,7 @@ from os import cpu_count
 import torch
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 from imitation.dataset import StateDataset
 from imitation.model import ImitationModel
@@ -15,7 +15,7 @@ BATCH_SIZE = 2048
 LR = 0.001
 N_EPOCHS = 20
 
-N_LAYERS = 5
+N_LAYERS = 3
 HIDDEN_DIM = 1024
 
 
