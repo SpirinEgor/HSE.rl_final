@@ -1,4 +1,4 @@
-from obstacle_avoidance.agents import ObstacleAvoidancePredatorAgent
+from imitation.agents import ImitationPredatorAgent
 from predators_and_preys_env.env import PredatorsAndPreysEnv
 from solution.agents import SolutionPreyAgent
 from utils import run_until_done, calculate_dead
@@ -6,7 +6,7 @@ from utils import run_until_done, calculate_dead
 
 def evaluate():
     env = PredatorsAndPreysEnv(render=True)
-    predator_agent = ObstacleAvoidancePredatorAgent(env.config["game"]["num_preds"])
+    predator_agent = ImitationPredatorAgent()
     prey_agent = SolutionPreyAgent()
 
     while True:

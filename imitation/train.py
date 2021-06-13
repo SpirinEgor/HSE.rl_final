@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from os import cpu_count
 
 import torch
 from torch.optim import AdamW
@@ -14,16 +15,19 @@ BATCH_SIZE = 2048
 LR = 0.001
 N_EPOCHS = 100
 
+N_LAYERS = 5
+HIDDEN_DIM = 1024
+
 
 def train(mode: str, data_path: str):
     seed_everything(None, SEED)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     dataset = StateDataset(data_path, mode, device)
-    dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, num_workers=0)
+    dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, num_workers=cpu_count())
 
     state, action = dataset[0]
-    model = ImitationModel(state.shape[0], 1)
+    model = ImitationModel(state.shape[0], 1, hidden_dim=HIDDEN_DIM, n_layers=N_LAYERS).to(device)
 
     optimizer = AdamW(model.parameters(), lr=LR)
 
