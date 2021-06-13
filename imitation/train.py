@@ -46,8 +46,7 @@ def train(mode: str, data_path: str):
             loss.backward()
             torch.nn.utils.clip_grad_value_(model.parameters(), 5.0)
             optimizer.step()
-
-    model.save(f"{mode}.pkl")
+            model.save(f"{mode}.pkl")
 
 
 if __name__ == "__main__":
