@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import Dict
 
+import numpy as np
 import torch
 from torch.nn import functional as F
 from torch.optim import Adam
@@ -77,7 +78,9 @@ class TD3:
         with torch.no_grad():
             target_action = self.target_actor(b_next_state)
             noise = torch.clip(
-                self._config.sigma * torch.randn_like(target_action), -self._config.clip_value, self._config.clip_value
+                self._config.sigma * torch.randn_like(target_action) - self._config.sigma / 2,
+                -self._config.clip_value,
+                self._config.clip_value
             )
             target_action = torch.clip(target_action + noise, -1, 1)
 
@@ -107,7 +110,9 @@ class TD3:
     def act(self, state_dict: Dict):
         with torch.no_grad():
             state = torch.tensor(state_dict_to_array(**state_dict), dtype=torch.float32, device=self._device)
-            return self.actor(state)
+            coords = self.actor(state)
+            x, y = coords.detach().cpu().numpy()
+            return np.array([np.arctan2(y, x) / np.pi])
 
     def save(self, filename: str = "agent.pkl"):
         state = {

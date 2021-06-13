@@ -16,12 +16,12 @@ class Config:
     gamma: float = 0.99
     tau: float = 0.002
     eps: float = 0.5
-    sigma: float = 2
+    sigma: float = 10
     batch_size: int = 512
-    transitions: int = 5_000_000
-    buffer_size: int = 2_000_000
-    initial_steps: int = batch_size * 512
+    transitions: int = 1_000_000
+    buffer_size: int = 200_000
+    initial_steps: int = batch_size * 128
     clip_value: float = 0.5
 
-    evaluate_step: int = 1_000
+    evaluate_step: int = 10_000
     evaluate_episodes: int = 5

@@ -19,9 +19,9 @@ class Actor(nn.Module):
         self.model = nn.Sequential(*modules)
 
     def forward(self, state):
+        # [bs; 2]
         coords = self.model(state)
-        x, y = coords.detach().cpu().numpy()
-        return numpy.array([numpy.arctan2(y, x) / numpy.pi])
+        return coords
 
 
 class Critic(nn.Module):

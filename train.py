@@ -72,7 +72,8 @@ class Trainer:
         for i in tqdm(range(self._config.transitions), total=self._config.transitions):
             # Epsilon-greedy policy
             action = prey_td3.act(state_dict)
-            action = np.clip(action + eps[0] * np.random.randn(*action.shape), -1, 1)
+            cur_eps = eps[0] * np.random.randn(*action.shape) - eps[0] / 2
+            action = np.clip(action + cur_eps, -1, 1)
 
             next_state_dict, done = env.step(predator_pfm.act(state_dict), action)
             reward = self.reward(next_state_dict, done)
