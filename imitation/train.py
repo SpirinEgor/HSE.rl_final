@@ -23,7 +23,7 @@ def train(mode: str, data_path: str):
     seed_everything(None, SEED)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    dataset = StateDataset(data_path, mode, device)
+    dataset = StateDataset(data_path, mode)
     dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, num_workers=cpu_count())
 
     state, action = dataset[0]
@@ -36,6 +36,8 @@ def train(mode: str, data_path: str):
     for _ in tqdm(range(N_EPOCHS), desc="Epoch: ", total=N_EPOCHS):
         batch_bar = tqdm(dataloader, desc="Batch: ")
         for batch_x, batch_y in batch_bar:
+            batch_x = batch_x.to(device)
+            batch_y = batch_y.to(device)
             pred_y = model(batch_x).squeeze(1)
             loss = mse_loss(pred_y, batch_y)
             batch_bar.set_description(f"Batch (loss: {loss.item()}):")

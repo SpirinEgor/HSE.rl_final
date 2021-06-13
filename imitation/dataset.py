@@ -54,12 +54,11 @@ def get_line_by_offset(file_path: str, offset: int) -> str:
 
 
 class StateDataset(Dataset):
-    def __init__(self, data_path: str, mode: str, device: torch.device):
+    def __init__(self, data_path: str, mode: str):
         self._data_path = data_path
         self._mode = mode
         self._samples_offsets = get_lines_offsets(data_path)
         self._n_samples = len(self._samples_offsets)
-        self._device = device
 
     def __getitem__(self, item: int) -> Tuple[torch.Tensor, torch.Tensor]:
         raw_sample = json.loads(get_line_by_offset(self._data_path, self._samples_offsets[item]))
@@ -77,7 +76,7 @@ class StateDataset(Dataset):
             )
         else:
             raise ValueError()
-        return torch.tensor(target_state, device=self._device), torch.tensor(target_action, device=self._device)
+        return torch.tensor(target_state), torch.tensor(target_action)
 
     def __len__(self):
         return self._n_samples
