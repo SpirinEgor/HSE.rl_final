@@ -4,8 +4,6 @@ from typing import Dict, List, Optional
 import numpy as np
 import torch
 
-from predators_and_preys_env.env import PredatorsAndPreysEnv
-
 
 def calculate_dead(state_dict: Dict) -> int:
     cnt = 0
@@ -46,7 +44,7 @@ def state_dict_to_array(predators: List[Dict], preys: List[Dict], obstacles: Lis
     return result
 
 
-def run_until_done(env: PredatorsAndPreysEnv, predator_agent, prey_agent) -> Dict:
+def run_until_done(env, predator_agent, prey_agent) -> Dict:
     state_dict = env.reset()
     while True:
         state_dict, done = env.step(predator_agent.act(state_dict), prey_agent.act(state_dict))
@@ -54,8 +52,9 @@ def run_until_done(env: PredatorsAndPreysEnv, predator_agent, prey_agent) -> Dic
             return state_dict
 
 
-def seed_everything(env: PredatorsAndPreysEnv, seed: int):
-    env.game.seed(seed)
+def seed_everything(env, seed: int):
+    if env is not None:
+        env.game.seed(seed)
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)

@@ -56,28 +56,24 @@ def get_line_by_offset(file_path: str, offset: int) -> str:
 class StateDataset(Dataset):
     def __init__(self, data_path: str, mode: str, device: torch.device):
         self._data_path = data_path
-        self._n_samples = count_lines_in_file(data_path)
         self._mode = mode
         self._samples_offsets = get_lines_offsets(data_path)
+        self._n_samples = len(self._samples_offsets)
         self._device = device
 
     def __getitem__(self, item: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        raw_sample = json.loads(get_line_by_offset(self._data_path, item))
-        state_dict = raw_sample["state_dict"]
+        raw_sample = json.loads(get_line_by_offset(self._data_path, self._samples_offsets[item]))
+        state_dict = raw_sample["state"]
         rand_target = random.randint(0, len(state_dict[self._mode]) - 1)
         if self._mode == "predators":
             target_action = raw_sample["pred_act"][rand_target]
             target_state = state_dict_to_array(
-                [state_dict["predators"][rand_target]],
-                state_dict["preys"],
-                state_dict["obstacles"]
+                [state_dict["predators"][rand_target]], state_dict["preys"], state_dict["obstacles"]
             )
         elif self._mode == "preys":
             target_action = raw_sample["prey_act"][rand_target]
             target_state = state_dict_to_array(
-                state_dict["predators"],
-                [state_dict["preys"][rand_target]],
-                state_dict["obstacles"]
+                state_dict["predators"], [state_dict["preys"][rand_target]], state_dict["obstacles"]
             )
         else:
             raise ValueError()

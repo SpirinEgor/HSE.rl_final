@@ -4,12 +4,7 @@ from torch import nn
 
 class ImitationModel(nn.Module):
     def __init__(
-            self,
-            state_dim: int,
-            action_dim: int = 0,
-            hidden_dim: int = 512,
-            n_layers: int = 5,
-            dropout: float = 0.5
+        self, state_dim: int, action_dim: int, hidden_dim: int = 1024, n_layers: int = 5, dropout: float = 0.0
     ):
         self._state_dim = state_dim
         self._action_dim = action_dim
@@ -27,13 +22,16 @@ class ImitationModel(nn.Module):
         return self._layers(state)
 
     def save(self, name: str):
-        torch.save({
-            "parameters": {
-                "state_dim": self._state_dim,
-                "action_dim": self._action_dim,
-                "hidden_dim": self._hidden_dim,
-                "n_layers": self._n_layers,
-                "dropout": self._dropout
+        torch.save(
+            {
+                "parameters": {
+                    "state_dim": self._state_dim,
+                    "action_dim": self._action_dim,
+                    "hidden_dim": self._hidden_dim,
+                    "n_layers": self._n_layers,
+                    "dropout": self._dropout,
+                },
+                "state_dict": self.state_dict(),
             },
-            "state_dict": self.state_dict()
-        }, name)
+            name,
+        )

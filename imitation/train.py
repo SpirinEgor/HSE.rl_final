@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from os import cpu_count
 
 import torch
 from torch.optim import AdamW
@@ -8,26 +7,23 @@ from tqdm.auto import tqdm
 
 from imitation.dataset import StateDataset
 from imitation.model import ImitationModel
-from predators_and_preys_env.env import PredatorsAndPreysEnv
 from utils import seed_everything
 
 SEED = 7
-DATA_PATH = ""
-BATCH_SIZE = 512
-LR = 0.01
-N_EPOCHS = 10
+BATCH_SIZE = 2048
+LR = 0.001
+N_EPOCHS = 100
 
 
-def train(mode: str):
-    env = PredatorsAndPreysEnv()
-    seed_everything(env, SEED)
+def train(mode: str, data_path: str):
+    seed_everything(None, SEED)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    dataset = StateDataset(DATA_PATH, mode, device)
-    dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, num_workers=cpu_count())
+    dataset = StateDataset(data_path, mode, device)
+    dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, num_workers=0)
 
     state, action = dataset[0]
-    model = ImitationModel(state.shape[0], action.shape[0])
+    model = ImitationModel(state.shape[0], 1)
 
     optimizer = AdamW(model.parameters(), lr=LR)
 
@@ -36,9 +32,9 @@ def train(mode: str):
     for _ in tqdm(range(N_EPOCHS), desc="Epoch: ", total=N_EPOCHS):
         batch_bar = tqdm(dataloader, desc="Batch: ")
         for batch_x, batch_y in batch_bar:
-            pred_y = model(batch_x)
+            pred_y = model(batch_x).squeeze(1)
             loss = mse_loss(pred_y, batch_y)
-            batch_bar.set_description(f"Batch (loss: f{loss.item()}):")
+            batch_bar.set_description(f"Batch (loss: {loss.item()}):")
 
             model.zero_grad()
             loss.backward()
@@ -50,6 +46,7 @@ def train(mode: str):
 
 if __name__ == "__main__":
     __arg_parser = ArgumentParser()
-    __arg_parser.add_argument("-m", "--mode", help="who to train", choices=["predators", "preys"])
+    __arg_parser.add_argument("-m", "--mode", help="who to train", choices=["predators", "preys"], required=True)
+    __arg_parser.add_argument("-d", "--dataset", help="path to dataset", required=True)
     __args = __arg_parser.parse_args()
-    train(__args.mode)
+    train(__args.mode, __args.dataset)
