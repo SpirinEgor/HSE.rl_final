@@ -13,6 +13,7 @@ from utils import seed_everything
 SEED = 7
 BATCH_SIZE = 2048
 LR = 0.001
+LR_GAMMA = 0.95
 N_EPOCHS = 20
 
 N_LAYERS = 3
@@ -28,6 +29,9 @@ def train(mode: str, data_path: str):
 
     state, action = dataset[0]
     model = ImitationModel(state.shape[0], 1, hidden_dim=HIDDEN_DIM, n_layers=N_LAYERS).to(device)
+    for layer in model.modules():
+        if isinstance(layer, torch.nn.Linear):
+            torch.nn.init.xavier_uniform_(layer.weight.data)
 
     optimizer = AdamW(model.parameters(), lr=LR)
 
@@ -43,10 +47,12 @@ def train(mode: str, data_path: str):
             batch_bar.set_description(f"Batch (loss: {loss.item()}):")
 
             loss.backward()
-            torch.nn.utils.clip_grad_value_(model.parameters(), 5.0)
+            # torch.nn.utils.clip_grad_value_(model.parameters(), 5.0)
             optimizer.step()
             model.zero_grad()
-            model.save(f"{mode}.pkl")
+        for g in optimizer.param_groups:
+            g['lr'] *= LR_GAMMA
+        model.save(f"{mode}.pkl")
 
 
 if __name__ == "__main__":
