@@ -10,9 +10,9 @@ from imitation.dataset import StateDataset
 from imitation.model import ImitationModel
 from utils import seed_everything
 
-SEED = 7
+SEED = 42
 BATCH_SIZE = 2048
-LR = 0.001
+LR = 0.0001
 LR_GAMMA = 0.95
 N_EPOCHS = 20
 
@@ -31,7 +31,7 @@ def train(mode: str, data_path: str):
     model = ImitationModel(state.shape[0], 1, hidden_dim=HIDDEN_DIM, n_layers=N_LAYERS).to(device)
     for layer in model.modules():
         if isinstance(layer, torch.nn.Linear):
-            torch.nn.init.xavier_uniform_(layer.weight.data)
+            torch.nn.init.xavier_normal_(layer.weight.data)
 
     optimizer = AdamW(model.parameters(), lr=LR)
 
@@ -40,6 +40,7 @@ def train(mode: str, data_path: str):
     for _ in tqdm(range(N_EPOCHS), desc="Epoch: ", total=N_EPOCHS):
         batch_bar = tqdm(dataloader, desc="Batch: ")
         for batch_x, batch_y in batch_bar:
+            model.zero_grad()
             batch_x = batch_x.to(device)
             batch_y = batch_y.to(device)
             pred_y = model(batch_x).squeeze(1)
