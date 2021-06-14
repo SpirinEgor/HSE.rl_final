@@ -29,18 +29,14 @@ def get_closest(source: Dict, targets: Dict) -> Optional[Dict]:
     return closest
 
 
-def state_dict_to_array(predators: List[Dict], preys: List[Dict], obstacles: List[Dict]) -> np.ndarray:
-    state_dim = len(preys) + 2 * (len(predators) + len(preys) + len(obstacles))
-    result = np.zeros(state_dim, dtype=np.float32)
-    pos = 0
-    for it in [predators, preys, obstacles]:
-        for desc in it:
-            result[pos] = desc["x_pos"]
-            result[pos + 1] = desc["y_pos"]
-            pos += 2
-    for desc in preys:
-        result[pos] = desc["is_alive"]
-        pos += 1
+def state_dict_to_array(predators: List[Dict], preys: List[Dict], obstacles: List[Dict]) -> List:
+    result = []
+    for pred in predators:
+        result += [pred["x_pos"], pred["y_pos"]]
+    for prey in preys:
+        result += [prey["x_pos"], prey["y_pos"], float(prey["is_alive"])]
+    for obstacle in obstacles:
+        result += [obstacle["x_pos"], obstacle["y_pos"], obstacle["radius"]]
     return result
 
 
